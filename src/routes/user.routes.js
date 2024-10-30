@@ -1,19 +1,19 @@
 import { Router } from "express";
 import {
-  loginUser,
-  logoutUser,
-  registerUser,
-  refreshAccessToken,
   changeCurrentPassword,
   getCurrentUser,
+  getUserChannelProfile,
+  getWatchedHistory,
+  loginUser,
+  logoutUser,
+  refreshAccessToken,
+  registerUser,
   updateAccountDetails,
   updateUserAvatar,
   updateUserCoverImage,
-  getUserChannelProfile,
-  getWatchedHistory,
 } from "../controllers/user.controllers.js";
-import { upload } from "../middlewares/multe.middlewares.js";
 import { verifyJwt } from "../middlewares/auth.middlewares.js";
+import { upload } from "../middlewares/multe.middlewares.js";
 
 const router = Router();
 
@@ -49,7 +49,7 @@ router
 
 router
   .route("/cover-image")
-  .patch(verifyJwt, upload.single("/coverImage"), updateUserCoverImage);
+  .patch(verifyJwt, upload.single("coverImage"), updateUserCoverImage);
 
 router.route("/c/:username").get(verifyJwt, getUserChannelProfile);
 

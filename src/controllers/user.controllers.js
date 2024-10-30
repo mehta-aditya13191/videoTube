@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 import { User } from "../models/user.models.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -183,7 +184,8 @@ const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: { refreshToken: undefined },
+      // $set: { refreshToken: undefined },
+      $unset: { refreshToken: 1 }, //this removes the field from the document
     },
     {
       new: true,
@@ -205,7 +207,7 @@ const logoutUser = asyncHandler(async (req, res) => {
 const refreshAccessToken = asyncHandler(async (req, res) => {
   try {
     const incomingRefreshToken =
-      req.cookie.refreshToken || req.body.refreshToken;
+      req.cookies.refreshToken || req.body.refreshToken;
 
     if (!incomingRefreshToken) {
       throw new ApiError(401, "Unauthorize request");
@@ -286,7 +288,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields are required");
   }
 
-  const user = User.findByIdAndUpdate(
+  const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
       $set: {
@@ -482,7 +484,7 @@ const getWatchedHistory = asyncHandler(async (req, res) => {
     },
   ]);
 
-  console.log("user in getWatchedHistory:---> ", user);
+  // console.log("user in getWatchedHistory:---> ", user);
 
   return res
     .status(200)
@@ -499,6 +501,7 @@ export {
   changeCurrentPassword,
   getCurrentUser,
   getUserChannelProfile,
+  getWatchedHistory,
   loginUser,
   logoutUser,
   refreshAccessToken,
@@ -506,5 +509,4 @@ export {
   updateAccountDetails,
   updateUserAvatar,
   updateUserCoverImage,
-  getWatchedHistory,
 };

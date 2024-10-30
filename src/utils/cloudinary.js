@@ -29,7 +29,19 @@ const uploadOnCloudinary = async (localFilePath) => {
   }
 };
 
-export { uploadOnCloudinary };
+const deleteFromCloudinary = async (url) => {
+  const publicId = url.split("/").pop().split(".")[0]; // Extract public ID from URL
+
+  try {
+    await cloudinary.v2.uploader.destroy(publicId);
+    console.log(`Deleted image with ID: ${publicId}`);
+  } catch (error) {
+    console.error(`Failed to delete image: ${error.message}`);
+    throw new ApiError(500, "Failed to delete old avatar image");
+  }
+};
+
+export { uploadOnCloudinary, deleteFromCloudinary };
 
 /*   
 

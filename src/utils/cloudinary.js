@@ -1,5 +1,4 @@
 import { v2 as cloudinary } from "cloudinary";
-
 import fs from "fs";
 
 cloudinary.config({
@@ -8,32 +7,37 @@ cloudinary.config({
   api_secret: process.env.API_SECRET, // Click 'View API Keys' above to copy your API secret
 });
 
-const uploadOnCloudinary = async (localFilePath) => {
+const uploadOnCloudinary = async (localFilePath, folderName = "videoTube") => {
   try {
     if (!localFilePath) {
       return null;
     }
-    //upload the file on cloudinary
+    // Upload the file to Cloudinary
     const response = await cloudinary.uploader.upload(localFilePath, {
       resource_type: "auto",
+      folder: folderName, // Specify the folder name here
     });
 
-    //file has been uploaded succefull
-    console.log("file is uploaded on cloudinary", response.url);
-    // console.log(response);
-    fs.unlinkSync(localFilePath);
+    // File has been uploaded successfully
+    // console.log("File is uploaded on Cloudinary", response);
+    fs.unlinkSync(localFilePath); // Delete the local file after upload
 
     return response;
   } catch (error) {
-    fs.unlinkSync(localFilePath); //remove the locally saved tempory file as the upload operation failed
+    console.error("Error uploading to Cloudinary:", error.message);
+    if (fs.existsSync(localFilePath)) {
+      fs.unlinkSync(localFilePath); // Remove locally saved temporary file if upload failed
+    }
+    throw error; // Re-throw the error to handle it in the calling function
   }
 };
 
 const deleteFromCloudinary = async (url) => {
   const publicId = url.split("/").pop().split(".")[0]; // Extract public ID from URL
+  // console.log("public id of url:-->", publicId);
 
   try {
-    await cloudinary.v2.uploader.destroy(publicId);
+    await cloudinary.uploader.destroy(publicId);
     console.log(`Deleted image with ID: ${publicId}`);
   } catch (error) {
     console.error(`Failed to delete image: ${error.message}`);
@@ -41,51 +45,4 @@ const deleteFromCloudinary = async (url) => {
   }
 };
 
-export { uploadOnCloudinary, deleteFromCloudinary };
-
-/*   
-
-(async function () {
-  // Configuration
-
-  cloudinary.config({
-    cloud_name: process.env.CLOUD_NAME,
-    api_key: process.env.API_KEY,
-    api_secret: process.env.API_SECRET, // Click 'View API Keys' above to copy your API secret
-  });
-
-  // Upload an image
-  const uploadResult = await cloudinary.uploader
-    .upload(
-      "https://res.cloudinary.com/demo/image/upload/getting-started/shoes.jpg",
-      {
-        public_id: "shoes",
-      }
-    )
-    .catch((error) => {
-      console.log(error);
-    });
-
-  console.log(uploadResult);
-
-  // Optimize delivery by resizing and applying auto-format and auto-quality
-  const optimizeUrl = cloudinary.url("shoes", {
-    fetch_format: "auto",
-    quality: "auto",
-  });
-
-  console.log(optimizeUrl);
-
-  // Transform the image: auto-crop to square aspect_ratio
-  const autoCropUrl = cloudinary.url("shoes", {
-    crop: "auto",
-    gravity: "auto",
-    width: 500,
-    height: 500,
-  });
-
-  console.log(autoCropUrl);
-})();
-
-
-*/
+export { deleteFromCloudinary, uploadOnCloudinary };

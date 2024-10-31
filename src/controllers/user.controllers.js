@@ -82,8 +82,11 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   //steip 5
-  const avatar = await uploadOnCloudinary(avatarLocalPath);
-  const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+  const avatar = await uploadOnCloudinary(avatarLocalPath, "avatar");
+  const coverImage = await uploadOnCloudinary(
+    coverImageLocalPath,
+    "coverImage"
+  );
 
   if (!avatar) {
     throw new ApiError(400, "Avatar file is required");

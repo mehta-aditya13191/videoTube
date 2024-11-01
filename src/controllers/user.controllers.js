@@ -83,6 +83,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   //steip 5
   const avatar = await uploadOnCloudinary(avatarLocalPath, "avatar");
+  // console.log("avatar---->", avatar);
   const coverImage = await uploadOnCloudinary(
     coverImageLocalPath,
     "coverImage"
@@ -406,7 +407,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
           $size: "$subscribers",
         },
         channelSubscribedToCount: {
-          $size: "subscribedTo",
+          $size: "$subscribedTo",
         },
         isSubscribed: {
           $cond: {
@@ -433,7 +434,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
 
   console.log("channel in getUserChannelProfile -> ", channel);
 
-  if (!channel?.lenght) {
+  if (!channel?.length) {
     throw new ApiError(404, "channel does not exists");
   }
 
@@ -487,8 +488,6 @@ const getWatchedHistory = asyncHandler(async (req, res) => {
     },
   ]);
 
-  // console.log("user in getWatchedHistory:---> ", user);
-
   return res
     .status(200)
     .json(
@@ -498,6 +497,32 @@ const getWatchedHistory = asyncHandler(async (req, res) => {
         "Watch History fetched successfully"
       )
     );
+
+  // console.log("user in getWatchedHistory:---> ", user);
+
+  // const user = await User.findById(req.user._id).populate({
+  //   path: "watchHistory",
+  //   populate: {
+  //     path: "owner", // Ensure this is the correct field name
+  //     select: "fullName username avatar",
+  //   },
+  // });
+
+  // // Ensure user is defined before accessing watchHistory
+  // if (!user) {
+  //   return res.status(404).json(new ApiResponse(404, null, "User not found"));
+  // }
+
+  // // Now safely access user.watchHistory
+  // return res
+  //   .status(200)
+  //   .json(
+  //     new ApiResponse(
+  //       200,
+  //       user.watchHistory,
+  //       "Watch History fetched successfully"
+  //     )
+  //   );
 });
 
 export {

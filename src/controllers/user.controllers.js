@@ -103,6 +103,11 @@ const registerUser = asyncHandler(async (req, res) => {
     username: username.toLowerCase(),
   });
 
+  //extra check by me
+  if (!user) {
+    throw new ApiError(400, "Error while registering the user ");
+  }
+
   //step-7
 
   const createdUser = await User.findById(user._id).select(
@@ -303,6 +308,12 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     { new: true }
   ).select("-password");
 
+  //this extra check added by me
+
+  if (!user) {
+    throw new ApiError(400, "Error while updating the account details ");
+  }
+
   return res
     .status(200)
     .json(new ApiResponse(200, user, "Account Details successfully"));
@@ -310,6 +321,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 
 const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
+  console.log("aditya req.files-----> ", req.file);
 
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar file is missing");
@@ -318,7 +330,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   //TODO: delete old image -assignment
   const user = await User.findById(req.user?._id);
   if (user?.avatar) {
-    await deleteFromCloudinary(user.avatar);
+    await deleteFromCloudinary(user.avatar, "image");
   }
 
   const avatar = await uploadOnCloudinary(avatarLocalPath);
@@ -337,6 +349,10 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     { new: true }
   ).select("-password");
 
+  if (!updatedUser) {
+    throw new ApiError(400, "Error while updating the avatar ");
+  }
+
   return res
     .status(200)
     .json(
@@ -353,7 +369,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 
   const user = await User.findById(req.user?._id);
   if (user?.coverImage) {
-    await deleteFromCloudinary(user.coverImage);
+    await deleteFromCloudinary(user.coverImage, "image");
   }
 
   const coverImage = await uploadOnCloudinary(coverImageLocalPath);
@@ -371,6 +387,10 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     },
     { new: true }
   ).select("-password");
+
+  if (!updatedUser) {
+    throw new ApiError(400, "Error while updating the coverImage ");
+  }
 
   return res
     .status(200)

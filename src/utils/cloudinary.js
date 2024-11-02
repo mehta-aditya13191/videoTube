@@ -1,5 +1,6 @@
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
+import { ApiError } from "./ApiError.js";
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -32,12 +33,18 @@ const uploadOnCloudinary = async (localFilePath, folderName = "videoTube") => {
   }
 };
 
-const deleteFromCloudinary = async (url) => {
+const deleteFromCloudinary = async (url, resourceType = "image") => {
+  if (!url) {
+    return null;
+  }
+
   const publicId = url.split("/").pop().split(".")[0]; // Extract public ID from URL
   // console.log("public id of url:-->", publicId);
 
   try {
-    await cloudinary.uploader.destroy(publicId);
+    await cloudinary.uploader.destroy(publicId, {
+      resource_type: resourceType,
+    });
     console.log(`Deleted image with ID: ${publicId}`);
   } catch (error) {
     console.error(`Failed to delete image: ${error.message}`);

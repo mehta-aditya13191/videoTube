@@ -147,11 +147,18 @@ const getVideoById = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Video not found");
   }
 
-  await Video.findByIdAndUpdate(videoId, {
-    $inc: {
-      views: 1,
+  const updatedVideo = await Video.findByIdAndUpdate(
+    videoId,
+    {
+      $inc: {
+        views: 1,
+      },
     },
-  });
+    {
+      new: true,
+    }
+  );
+  video[0].views = updatedVideo.views;
 
   await User.findByIdAndUpdate(req.user?._id, {
     $addToSet: {
@@ -163,8 +170,101 @@ const getVideoById = asyncHandler(async (req, res) => {
 });
 
 const getAllVideos = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
-  //TODO: get all videos based on query, sort, pagination
+  const {
+    page = 1,
+    limit = 10,
+    query,
+    sortBy = "createdAt",
+    sortType = "desc",
+    userId,
+  } = req.query;
+
+  const pageNum = parseInt(page);
+  const limitNum = parseInt(limit);
+
+  // Build match conditions
+  const matchConditions = [];
+
+  if (query) {
+    matchConditions.push(
+      { title: { $regex: query, $options: "i" } },
+      { description: { $regex: query, $options: "i" } }
+    );
+  }
+
+  if (userId) {
+    matchConditions.push({
+      owner: new mongoose.Types.ObjectId(userId),
+    });
+  }
+
+  // Build the aggregation pipeline
+  const videos = await Video.aggregate([
+    {
+      $match: {
+        $or: matchConditions.length > 0 ? matchConditions : [{}],
+      },
+    },
+    {
+      $match: { isPublished: true },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "owner",
+        pipeline: [
+          {
+            $project: {
+              fullName: 1,
+              username: 1,
+              avatar: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $addFields: {
+        owner: { $arrayElemAt: ["$owner", 0] },
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        owner: 1,
+        videoFile: 1,
+        thumbnail: 1,
+        createdAt: 1,
+        description: 1,
+        title: 1,
+        duration: 1,
+        views: 1,
+        isPublished: 1,
+      },
+    },
+    {
+      $sort: {
+        [sortBy]: sortType === "asc" ? 1 : -1,
+      },
+    },
+    {
+      $skip: (pageNum - 1) * limitNum,
+    },
+    {
+      $limit: limitNum,
+    },
+  ]);
+
+  // Validate results
+  if (!videos || videos.length === 0) {
+    throw new ApiError(404, "Videos not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, videos, "All videos are fetched successfully"));
 });
 
 const updateVideo = asyncHandler(async (req, res) => {

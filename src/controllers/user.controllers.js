@@ -348,7 +348,12 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
   const coverImageLocalPath = req.file?.path;
 
   if (!coverImageLocalPath) {
-    throw new ApiError(400, "Avatar file is missing");
+    throw new ApiError(400, "CoverImage file is missing");
+  }
+
+  const user = await User.findById(req.user?._id);
+  if (user?.coverImage) {
+    await deleteFromCloudinary(user.coverImage);
   }
 
   const coverImage = await uploadOnCloudinary(coverImageLocalPath);
@@ -357,7 +362,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Error while uploading on avatar");
   }
 
-  const user = await User.findByIdAndUpdate(
+  const updatedUser = await User.findByIdAndUpdate(
     req.user._id,
     {
       $set: {
@@ -369,7 +374,9 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, user, "coverImage  is updated Successfully"));
+    .json(
+      new ApiResponse(200, updatedUser, "coverImage  is updated Successfully")
+    );
 });
 
 const getUserChannelProfile = asyncHandler(async (req, res) => {
@@ -488,6 +495,7 @@ const getWatchedHistory = asyncHandler(async (req, res) => {
     },
   ]);
 
+  // console.log("user in getWatchedHistory:---> ", user);
   return res
     .status(200)
     .json(
@@ -497,32 +505,6 @@ const getWatchedHistory = asyncHandler(async (req, res) => {
         "Watch History fetched successfully"
       )
     );
-
-  // console.log("user in getWatchedHistory:---> ", user);
-
-  // const user = await User.findById(req.user._id).populate({
-  //   path: "watchHistory",
-  //   populate: {
-  //     path: "owner", // Ensure this is the correct field name
-  //     select: "fullName username avatar",
-  //   },
-  // });
-
-  // // Ensure user is defined before accessing watchHistory
-  // if (!user) {
-  //   return res.status(404).json(new ApiResponse(404, null, "User not found"));
-  // }
-
-  // // Now safely access user.watchHistory
-  // return res
-  //   .status(200)
-  //   .json(
-  //     new ApiResponse(
-  //       200,
-  //       user.watchHistory,
-  //       "Watch History fetched successfully"
-  //     )
-  //   );
 });
 
 export {

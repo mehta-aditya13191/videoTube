@@ -64,9 +64,6 @@ const registerUser = asyncHandler(async (req, res) => {
 
   //step 4
   const avatarLocalPath = req.files?.avatar[0]?.path;
-  // console.log("req.files---->", req.files);
-
-  //   const coverImageLocalPath = req.files?.coverImage[0]?.path;
 
   let coverImageLocalPath;
   if (
@@ -105,7 +102,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   //extra check by me
   if (!user) {
-    throw new ApiError(400, "Error while registering the user ");
+    throw new ApiError(500, "Error while registering the user ");
   }
 
   //step-7

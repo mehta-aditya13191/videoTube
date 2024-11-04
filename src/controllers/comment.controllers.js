@@ -1,5 +1,6 @@
 import mongoose, { isValidObjectId } from "mongoose";
 import { Comment } from "../models/comment.models.js";
+import { Dislike } from "../models/dislike.models.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -96,10 +97,34 @@ const getVideoComments = asyncHandler(async (req, res) => {
       },
     },
     {
+      $lookup: {
+        from: "dislikes",
+        localField: "_id",
+        foreignField: "comment",
+        as: "dislikes",
+      },
+    },
+    {
+      $addFields: {
+        dislikesOnComment: {
+          $size: "$dislikes",
+        },
+        IsdisLiked: {
+          $cond: {
+            if: { $in: [req.user?._id, "$dislikes.dislikedBy"] },
+            then: true,
+            else: false,
+          },
+        },
+      },
+    },
+    {
       $project: {
         _id: 1,
         likesOnComment: 1,
         isLiked: 1,
+        dislikesOnComment: 1,
+        IsdisLiked: 1,
         owner: 1,
         content: 1,
         createdAt: 1,
@@ -146,7 +171,7 @@ const updateComment = asyncHandler(async (req, res) => {
   }
 
   if (comment.owner.toString() !== req.user?._id.toString()) {
-    throw new ApiError(400, "You are not authorize to edit the comment");
+    throw new ApiError(401, "You are not authorize to edit the comment");
   }
 
   comment.content = content;
@@ -172,8 +197,12 @@ const deleteComment = asyncHandler(async (req, res) => {
   }
 
   if (comment.owner.toString() !== req.user?._id.toString()) {
-    throw new ApiError(400, "You are not authorize to delete the comment");
+    throw new ApiError(401, "You are not authorize to delete the comment");
   }
+
+  // removing the like comment for this comment
+  await Like.deleteMany({ comment: commentId });
+  await Dislike.deleteMany({ comment: commentId });
 
   await Comment.findByIdAndDelete(commentId);
 

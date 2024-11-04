@@ -1,4 +1,5 @@
 import mongoose, { isValidObjectId } from "mongoose";
+import { Dislike } from "../models/dislike.models.js";
 import { User } from "../models/user.models.js";
 import { Video } from "../models/video.models.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -82,7 +83,29 @@ const getVideoById = asyncHandler(async (req, res) => {
             else: false,
           },
         },
-        comments: "$likes.comments",
+        comments: {
+          $size: "$likes.comments",
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: "dislikes",
+        localField: "_id",
+        foreignField: "video",
+        as: "dislikes",
+      },
+    },
+    {
+      $addFields: {
+        dislikesCount: { $size: "$dislikes" },
+        IsDisLiked: {
+          $cond: {
+            if: { $in: [req.user?._id, "$dislikes.dislikedBy"] },
+            then: true,
+            else: false,
+          },
+        },
       },
     },
     {
@@ -142,6 +165,8 @@ const getVideoById = asyncHandler(async (req, res) => {
         comments: 1,
         likesCount: 1,
         isLiked: 1,
+        dislikesCount: 1,
+        IsDisLiked: 1,
       },
     },
   ]);
@@ -287,7 +312,7 @@ const updateVideo = asyncHandler(async (req, res) => {
 
   // Check if the user is updating their own video
   if (video.owner.toString() !== req.user?._id.toString()) {
-    throw new ApiError(403, "You are not authorized to update this video");
+    throw new ApiError(401, "You are not authorized to update this video");
   }
 
   // Check if at least one field is provided
@@ -367,7 +392,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
   }
 
   if (video?.owner.toString() !== req.user?._id.toString()) {
-    throw new ApiError(403, "You are not authorized to delete this video");
+    throw new ApiError(401, "You are not authorized to delete this video");
   }
 
   const oldthumbnail = video?.thumbnail;
@@ -379,6 +404,11 @@ const deleteVideo = asyncHandler(async (req, res) => {
   if (oldVideoFile) {
     await deleteFromCloudinary(oldVideoFile, "video");
   }
+
+  //removing all the comment and all the like of the video
+  await Comment.deleteMany({ video: videoId });
+  await Like.deleteMany({ video: videoId });
+  await Dislike.deleteMany({ video: videoId });
 
   //remove the video from database
   await Video.findByIdAndDelete(videoId);
@@ -411,7 +441,7 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
 
   if (video?.owner.toString() !== req.user?._id.toString()) {
     throw new ApiError(
-      403,
+      401,
       "You are not authorized to change the Status this video"
     );
   }

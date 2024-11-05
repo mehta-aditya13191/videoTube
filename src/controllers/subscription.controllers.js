@@ -23,11 +23,20 @@ const toggleSubscription = asyncHandler(async (req, res) => {
     channel: channelId,
   });
 
+  if (!isSubscriber) {
+    throw new ApiError(404, "Subscriber not found while toggling");
+  }
+
   if (isSubscriber) {
-    await Subscription.deleteOne({
+    const Unsubscribed = await Subscription.deleteOne({
       subscriber: req.user?._id,
       channel: channelId,
     });
+
+    if (!Unsubscribed) {
+      throw new ApiError(500, "Something went wrong while unsubscribing");
+    }
+
     isSubscribed = false;
   } else {
     const newSubscriber = await Subscription.create({
@@ -36,7 +45,7 @@ const toggleSubscription = asyncHandler(async (req, res) => {
     });
 
     if (!newSubscriber) {
-      throw new ApiError(500, "Error while toggling the subscription");
+      throw new ApiError(500, "Something went wrong while subscribing");
     }
     isSubscribed = true;
   }

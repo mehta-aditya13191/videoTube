@@ -2,9 +2,9 @@
 # Model
 [model diagram](https://app.eraser.io/workspace/MTrf3xOiEx7TV1npgMlN?origin=share)
 
-# VideoTube - Video Sharing Platform
+# VideoTube - Video Sharing Platform :
+VideoTube is a dynamic video-sharing platform that allows users to upload, like, comment, and share videos. It provides functionalities for users to create and manage playlists, subscribe to channels, and track their watch history. The platform also offers features for video recommendations, statistics for channel owners (like total views, subscribers, and video likes), and an easy-to-navigate interface to enhance the user experience.
 
-videoTube is a dynamic video-sharing platform that allows users to upload, like, comment, and share videos. It provides functionalities for users to create and manage playlists, subscribe to channels, and track their watch history. The platform also offers features for video recommendations, statistics for channel owners (like total views, subscribers, and video likes), and an easy-to-navigate interface to enhance the user experience.
 ---
 
 ## Key Features

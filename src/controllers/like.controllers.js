@@ -201,9 +201,10 @@ const getLikedVideos = asyncHandler(async (req, res) => {
     {
       $match: {
         likedBy: req.user?._id,
+        video: { $ne: null },
       },
     },
-    { $match: { video: { $exists: true } } },
+    // { $match: { video: { $exists: true } } },
     {
       $lookup: {
         from: "videos",

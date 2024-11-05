@@ -6,10 +6,10 @@ videoTube is a dynamic video-sharing platform that allows users to upload, like,
 
 # Features
 # 👤 User Management:
-🔑 User Registration, Login, Logout, and Password Management
-🖼️ Profile Customization (Avatar & Cover Image)
-📜 Watch History Tracking & Clearing
-❤️ Liked Videos Tracking
+.🔑 User Registration, Login, Logout, and Password Management
+.🖼️ Profile Customization (Avatar & Cover Image)
+.📜 Watch History Tracking & Clearing
+.❤️ Liked Videos Tracking
 
 # 📹 Video Management:
 📤 Upload Videos in Various Resolutions (720p, etc.)

@@ -79,6 +79,5 @@ VideoTube is a dynamic video-sharing platform that allows users to upload, like,
 ### 📥 Installation and Setup
 
 1. Clone the repository:
-   ```bash
-   [git clone] (https://github.com/mehta-aditya13191/videoTube)
-   ```
+
+   [git clone](https://github.com/mehta-aditya13191/videoTube)

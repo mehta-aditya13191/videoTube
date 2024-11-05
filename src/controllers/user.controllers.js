@@ -318,7 +318,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 
 const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
-  console.log("aditya req.files-----> ", req.file);
+  // console.log("aditya req.files-----> ", req.file);
 
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar file is missing");
@@ -456,7 +456,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     },
   ]);
 
-  console.log("channel in getUserChannelProfile -> ", channel);
+  // console.log("channel in getUserChannelProfile -> ", channel);
 
   if (!channel?.length) {
     throw new ApiError(404, "channel does not exists");

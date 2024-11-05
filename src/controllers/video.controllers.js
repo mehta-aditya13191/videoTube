@@ -37,8 +37,8 @@ const publishAVideo = asyncHandler(async (req, res) => {
   const video = await Video.create({
     videoFile: videoFile.url,
     thumbnail: thumbnail.url,
-    title,
-    description: description || " ",
+    title: title.trim(),
+    description: description.trim() || " ",
     duration: videoFile.duration || 0,
     owner: req.user?._id,
   });
@@ -329,8 +329,8 @@ const updateVideo = asyncHandler(async (req, res) => {
   const whatToUpdate = {};
 
   // Update title and description if provided
-  if (title) whatToUpdate.title = title;
-  if (description) whatToUpdate.description = description;
+  if (title) whatToUpdate.title = title.trim();
+  if (description) whatToUpdate.description = description.trim();
 
   // Handle video file update if provided
   const videoFileLocalPath = req.files?.videoFile?.[0]?.path;

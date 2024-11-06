@@ -5,10 +5,12 @@ const playListSchema = new mongoose.Schema(
     name: {
       type: String,
       require: true,
+      trim: true,
     },
     description: {
       type: String,
       require: true,
+      trim: true,
     },
     videos: [
       {

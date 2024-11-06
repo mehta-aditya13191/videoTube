@@ -6,6 +6,7 @@ const commentSchema = new mongoose.Schema(
     content: {
       type: String,
       require: true,
+      trim: true,
     },
     video: {
       type: mongoose.Schema.Types.ObjectId,

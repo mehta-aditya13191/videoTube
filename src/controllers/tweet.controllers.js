@@ -15,7 +15,7 @@ const createTweet = asyncHandler(async (req, res) => {
   }
 
   const createdTweet = await Tweet.create({
-    content: tweet.trim(),
+    content: tweet,
     owner: req.user?._id,
   });
 
@@ -215,7 +215,7 @@ const updateTweet = asyncHandler(async (req, res) => {
     throw new ApiError(401, "You are not authorize to edit the tweet");
   }
 
-  tweet.content = content.trim();
+  tweet.content = content;
   tweet.save();
 
   return res

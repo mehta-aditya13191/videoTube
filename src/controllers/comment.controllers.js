@@ -19,7 +19,7 @@ const addComment = asyncHandler(async (req, res) => {
   }
 
   const comment = await Comment.create({
-    content: content.trim(),
+    content: content,
     video: videoId,
     owner: req.user?._id,
   });
@@ -174,7 +174,7 @@ const updateComment = asyncHandler(async (req, res) => {
     throw new ApiError(401, "You are not authorize to edit the comment");
   }
 
-  comment.content = content.trim();
+  comment.content = content;
   await comment.save();
 
   return res

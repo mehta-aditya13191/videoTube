@@ -14,8 +14,8 @@ const createPlaylist = asyncHandler(async (req, res) => {
   }
 
   const createdPlaylist = await Playlist.create({
-    name: name.trim(),
-    description: description.trim() || "",
+    name: name,
+    description: description || "",
     owner: req.user?._id,
   });
 
